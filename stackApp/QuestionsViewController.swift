@@ -58,6 +58,16 @@ class QuestionsViewController: UIViewController, UITableViewDelegate, UITableVie
         array.add(dict)
         UserDefaults.standard.set(array as NSMutableArray, forKey: "offline")
         UserDefaults.standard.synchronize()
+        
+        let alertController = UIAlertController(
+            title: "Saved for offline access!",
+            message: "The question has been saved for offline mode.",
+            preferredStyle: .alert)
+        
+        let cancelAction = UIAlertAction(title: "OK", style: .cancel, handler: nil)
+        alertController.addAction(cancelAction)
+        
+        self.present(alertController, animated: true, completion: nil)
     }
 
 
