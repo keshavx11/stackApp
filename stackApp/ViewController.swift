@@ -31,8 +31,8 @@ class ViewController: UIViewController, YSSegmentedControlDelegate {
         firstViewController.view.translatesAutoresizingMaskIntoConstraints = false
         self.currentViewController = firstViewController
         
-        self.navigationController!.navigationBar.barTintColor = UIColor.white
-        self.navigationController!.navigationBar.titleTextAttributes = [NSForegroundColorAttributeName: UIColor.black]
+        self.navigationController!.navigationBar.barTintColor = blueInstagramColor
+        self.navigationController!.navigationBar.titleTextAttributes = [NSForegroundColorAttributeName: UIColor.white]
         
         self.addChildViewController(self.currentViewController!)
         self.addSubview(self.currentViewController!.view, toView: self.containerView)
@@ -53,10 +53,12 @@ class ViewController: UIViewController, YSSegmentedControlDelegate {
                 control, index in
         })
         segmented.delegate = self
+        segmented.appearance.backgroundColor = blueInstagramColor
+        segmented.appearance.selectedBackgroundColor = blueInstagramColor
         segmented.appearance.textColor = UIColor.black
-        segmented.appearance.selectedTextColor = blueInstagramColor
-        segmented.appearance.bottomLineColor = blueInstagramColor
-        segmented.appearance.selectorColor = blueInstagramColor
+        segmented.appearance.selectedTextColor = UIColor.white
+        segmented.appearance.bottomLineColor = UIColor.white
+        segmented.appearance.selectorColor = UIColor.white
         segmented.appearance.font = .boldSystemFont(ofSize: 14)
         
         view.addSubview(segmented)
