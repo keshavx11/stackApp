@@ -318,6 +318,7 @@
 				E180A61A1EDE8DA1007F74AE /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};
