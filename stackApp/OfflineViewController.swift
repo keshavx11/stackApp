@@ -107,7 +107,6 @@ class OfflineViewController: UIViewController, UITableViewDelegate, UITableViewD
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         let dict = self.quesArray[indexPath.row]
-        let title = dict.value(forKey: "title") as! String
         let link = dict.value(forKey: "link") as! String
         
         let alertController = UIAlertController(title: "Select an option", message: nil, preferredStyle: .actionSheet)
