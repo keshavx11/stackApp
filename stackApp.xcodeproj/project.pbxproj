@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		E10E7F901EE0785E00C188BF /* GetJson.swift in Sources */ = {isa = PBXBuildFile; fileRef = E10E7F8F1EE0785E00C188BF /* GetJson.swift */; };
+		E10E7F931EE079A600C188BF /* Model.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = E10E7F911EE079A600C188BF /* Model.xcdatamodeld */; };
 		E180A60A1EDE8DA1007F74AE /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = E180A6091EDE8DA1007F74AE /* AppDelegate.swift */; };
 		E180A60C1EDE8DA1007F74AE /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = E180A60B1EDE8DA1007F74AE /* ViewController.swift */; };
 		E180A60F1EDE8DA1007F74AE /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = E180A60D1EDE8DA1007F74AE /* Main.storyboard */; };
@@ -19,6 +21,8 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		E10E7F8F1EE0785E00C188BF /* GetJson.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GetJson.swift; sourceTree = "<group>"; };
+		E10E7F921EE079A600C188BF /* Model.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = Model.xcdatamodel; sourceTree = "<group>"; };
 		E180A6061EDE8DA1007F74AE /* stackApp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = stackApp.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		E180A6091EDE8DA1007F74AE /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		E180A60B1EDE8DA1007F74AE /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
@@ -67,7 +71,9 @@
 				E180A61D1EDE9CF9007F74AE /* QuestionsViewController.swift */,
 				E180A61F1EDE9D06007F74AE /* OfflineViewController.swift */,
 				E180A6231EDEA17B007F74AE /* QuestionCell.swift */,
+				E10E7F8F1EE0785E00C188BF /* GetJson.swift */,
 				E180A61B1EDE9C31007F74AE /* YSSegmentedControl.swift */,
+				E10E7F911EE079A600C188BF /* Model.xcdatamodeld */,
 				E180A60D1EDE8DA1007F74AE /* Main.storyboard */,
 				E180A6101EDE8DA1007F74AE /* Assets.xcassets */,
 				E180A6121EDE8DA1007F74AE /* LaunchScreen.storyboard */,
@@ -152,8 +158,10 @@
 				E180A60C1EDE8DA1007F74AE /* ViewController.swift in Sources */,
 				E180A60A1EDE8DA1007F74AE /* AppDelegate.swift in Sources */,
 				E180A61E1EDE9CF9007F74AE /* QuestionsViewController.swift in Sources */,
+				E10E7F931EE079A600C188BF /* Model.xcdatamodeld in Sources */,
 				E180A6241EDEA17B007F74AE /* QuestionCell.swift in Sources */,
 				E180A61C1EDE9C31007F74AE /* YSSegmentedControl.swift in Sources */,
+				E10E7F901EE0785E00C188BF /* GetJson.swift in Sources */,
 				E180A6201EDE9D06007F74AE /* OfflineViewController.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -321,6 +329,19 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCVersionGroup section */
+		E10E7F911EE079A600C188BF /* Model.xcdatamodeld */ = {
+			isa = XCVersionGroup;
+			children = (
+				E10E7F921EE079A600C188BF /* Model.xcdatamodel */,
+			);
+			currentVersion = E10E7F921EE079A600C188BF /* Model.xcdatamodel */;
+			path = Model.xcdatamodeld;
+			sourceTree = "<group>";
+			versionGroupType = wrapper.xcdatamodel;
+		};
+/* End XCVersionGroup section */
 	};
 	rootObject = E180A5FE1EDE8DA1007F74AE /* Project object */;
 }

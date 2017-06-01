@@ -7,23 +7,32 @@
 //
 
 import UIKit
+import CoreData
 
-class QuestionsViewController: UIViewController, UITableViewDelegate, UITableViewDataSource, UISearchBarDelegate {
+class QuestionsViewController: UIViewController, UITableViewDelegate, UITableViewDataSource, UISearchBarDelegate, GetJsonDelegate {
+    
+    var manager = GetJson()
+    
+    func manageTable() {
+        self.tableView.reloadData()
+        self.endLoad()
+    }
+    
+    var sortParam = "hot"
+    var filterParam = ""
+    var tagText = ""
     
     @IBOutlet var detailView: UIView!
     @IBOutlet var blurView: UIView!
     
     var tap :UITapGestureRecognizer!
-    var sortParam = "hot"
-    var filterParam = ""
-    var tagText = ""
     
     @IBOutlet var searchBar: UISearchBar!
     var searchActive : Bool = false
     
     @IBOutlet var activityIndicator: UIActivityIndicatorView!
     @IBOutlet var tableView: UITableView!
-    var quesArray = NSArray()
+//    var quesArray = NSArray()
     @IBOutlet var sortBtn: UIButton!
     @IBOutlet var filterBtn: UIButton!
     
@@ -41,7 +50,7 @@ class QuestionsViewController: UIViewController, UITableViewDelegate, UITableVie
     
     @IBAction func visitLink(){
         
-        let dict = self.quesArray.object(at: currentIndex) as! NSDictionary
+        let dict = manager.quesArray.object(at: currentIndex) as! NSDictionary
         let link = dict.object(forKey: "link") as! String
         UIApplication.shared.open(URL(string:link)!, options: [:], completionHandler: nil)
         
@@ -49,25 +58,76 @@ class QuestionsViewController: UIViewController, UITableViewDelegate, UITableVie
     
     @IBAction func addtoOffline(){
         
-        let dict = self.quesArray.object(at: currentIndex) as! NSDictionary
-        let array = NSMutableArray()
-        if UserDefaults.standard.value(forKey: "offline") != nil{
-            let arr = (UserDefaults.standard.object(forKey: "offline") as! NSArray).mutableCopy()
-            array.addObjects(from: arr as! [AnyObject])
+        let dict = manager.quesArray.object(at: currentIndex) as! NSDictionary
+        let link = dict.object(forKey: "link") as! String
+        let title = dict.object(forKey: "title") as! String
+        
+        let appDel: AppDelegate = UIApplication.shared.delegate as! AppDelegate
+        let context: NSManagedObjectContext = appDel.managedObjectContext
+        
+        let request = NSFetchRequest<NSFetchRequestResult>(entityName: "OfflineQuestions")
+        request.predicate = NSPredicate(format: "link= %@", link)
+        request.returnsObjectsAsFaults = false
+        
+        do{
+            
+            let results = try context.fetch(request)
+            if results.count > 0 {
+                
+                let alertController = UIAlertController(
+                    title: "Already Added!",
+                    message: "The question is already present for offline mode.",
+                    preferredStyle: .alert)
+                
+                let cancelAction = UIAlertAction(title: "OK", style: .cancel, handler: nil)
+                alertController.addAction(cancelAction)
+                
+                self.present(alertController, animated: true, completion: nil)
+                
+            }else{
+                
+                let votes = dict.object(forKey: "score") as! NSNumber
+                let answers = dict.object(forKey: "answer_count") as! NSNumber
+                let onwerName = (dict.object(forKey: "owner") as! NSDictionary).object(forKey: "display_name") as! String
+                let answered = dict.object(forKey: "is_answered") as! Bool
+                
+                let timeResult = dict.object(forKey: "creation_date") as! Double
+                let date = NSDate(timeIntervalSince1970: timeResult)
+                let dayTimePeriodFormatter = DateFormatter()
+                dayTimePeriodFormatter.dateFormat = "dd MMM YYYY"
+                let dateString = dayTimePeriodFormatter.string(from: date as Date)
+                
+                let newQues = NSEntityDescription.insertNewObject(forEntityName: "OfflineQuestions", into: context)
+                
+                newQues.setValue(title, forKey: "title")
+                newQues.setValue(votes, forKey: "votes")
+                newQues.setValue(answers, forKey: "answers")
+                newQues.setValue(onwerName, forKey: "owner")
+                newQues.setValue(dateString, forKey: "date")
+                newQues.setValue(answered, forKey: "isAnswered")
+                newQues.setValue(link, forKey: "link")
+                
+                do {
+                    try context.save()
+                }catch{
+                    print("There was a problem!")
+                }
+                
+                let alertController = UIAlertController(
+                    title: "Saved for offline access!",
+                    message: "The question has been saved for offline mode.",
+                    preferredStyle: .alert)
+                
+                let cancelAction = UIAlertAction(title: "OK", style: .cancel, handler: nil)
+                alertController.addAction(cancelAction)
+                
+                self.present(alertController, animated: true, completion: nil)
+            }
+            
+        }catch{
+            print("Fetch Failed")
         }
-        array.add(dict)
-        UserDefaults.standard.set(array as NSMutableArray, forKey: "offline")
-        UserDefaults.standard.synchronize()
-        
-        let alertController = UIAlertController(
-            title: "Saved for offline access!",
-            message: "The question has been saved for offline mode.",
-            preferredStyle: .alert)
-        
-        let cancelAction = UIAlertAction(title: "OK", style: .cancel, handler: nil)
-        alertController.addAction(cancelAction)
-        
-        self.present(alertController, animated: true, completion: nil)
+
     }
 
 
@@ -90,13 +150,13 @@ class QuestionsViewController: UIViewController, UITableViewDelegate, UITableVie
         alertController.addAction(UIAlertAction(title: "Creation", style: .default, handler: {(action:UIAlertAction) in
             self.setLoad()
             self.sortParam = "creation"
-            self.getJson()
+            self.manager.getQuestions(sortParam: self.sortParam, filterParam: self.filterParam, tagText: self.tagText)
         }))
         
         alertController.addAction(UIAlertAction(title: "Votes", style: .default, handler: {(action:UIAlertAction) in
             self.setLoad()
             self.sortParam = "votes"
-            self.getJson()
+            self.manager.getQuestions(sortParam: self.sortParam, filterParam: self.filterParam, tagText: self.tagText)
         }))
         
         alertController.addAction(UIAlertAction(title: "Cancel", style: .cancel, handler: {(action:UIAlertAction) in
@@ -116,7 +176,7 @@ class QuestionsViewController: UIViewController, UITableViewDelegate, UITableVie
             if self.sortParam == "hot"{
                 self.sortParam = "votes"
             }
-            self.getJson()
+            self.manager.getQuestions(sortParam: self.sortParam, filterParam: self.filterParam, tagText: self.tagText)
         }))
         
         alertController.addAction(UIAlertAction(title: "Featured", style: .default, handler: {(action:UIAlertAction) in
@@ -125,7 +185,7 @@ class QuestionsViewController: UIViewController, UITableViewDelegate, UITableVie
             if self.sortParam == "hot"{
                 self.sortParam = "votes"
             }
-            self.getJson()
+            self.manager.getQuestions(sortParam: self.sortParam, filterParam: self.filterParam, tagText: self.tagText)
         }))
         
         alertController.addAction(UIAlertAction(title: "Cancel", style: .cancel, handler: {(action:UIAlertAction) in
@@ -133,39 +193,6 @@ class QuestionsViewController: UIViewController, UITableViewDelegate, UITableVie
         }))
         
         self.present(alertController, animated: true, completion: nil)
-    }
-    
-    func getJson(){
-        
-        let urlString = "https://api.stackexchange.com/2.2/questions\(filterParam)?page=1&pagesize=10&order=desc&sort=\(sortParam)&tagged=\(tagText)&site=stackoverflow"
-        
-        print(urlString)
-        
-        let url = URL(string: urlString)
-        URLSession.shared.dataTask(with:url!) { (data, response, error) in
-            if error != nil {
-                print(error!)
-            } else {
-                do {
-                    
-                    let parsedData = try JSONSerialization.jsonObject(with: data!, options: [])
-                    
-                    let dict = parsedData as! Dictionary<String, Any>
-                    
-                    self.quesArray = dict["items"] as! NSArray
-                    var array = NSArray()
-                    array = self.quesArray
-                    UserDefaults.standard.set(array, forKey: "lastFetch")
-                    UserDefaults.standard.synchronize()
-                    self.tableView.reloadData()
-                    self.endLoad()
-                    
-                } catch let error as NSError {
-                    print(error)
-                }
-            }
-            
-            }.resume()
     }
     
     func searchBarTextDidBeginEditing(_ searchBar: UISearchBar) {
@@ -188,7 +215,7 @@ class QuestionsViewController: UIViewController, UITableViewDelegate, UITableVie
         if searchBar.text != nil{
             self.setLoad()
             tagText = String(describing: searchBar.text!)
-            self.getJson()
+            manager.getQuestions(sortParam: self.sortParam, filterParam: self.filterParam, tagText: self.tagText)
         }
     }
     
@@ -228,6 +255,8 @@ class QuestionsViewController: UIViewController, UITableViewDelegate, UITableVie
     override func viewDidLoad() {
         super.viewDidLoad()
         
+        self.manager.delegate = self
+        
         sortBtn.layer.cornerRadius = 5
         sortBtn.layer.masksToBounds = true
         filterBtn.layer.cornerRadius = 5
@@ -236,9 +265,9 @@ class QuestionsViewController: UIViewController, UITableViewDelegate, UITableVie
         self.activityIndicator.hidesWhenStopped = true
         
         if UserDefaults.standard.value(forKey: "lastFetch") == nil{
-            self.getJson()
+            manager.getQuestions(sortParam: self.sortParam, filterParam: self.filterParam, tagText: self.tagText)
         }else{
-            self.quesArray = UserDefaults.standard.object(forKey: "lastFetch") as! NSArray
+            manager.quesArray = UserDefaults.standard.object(forKey: "lastFetch") as! NSArray
             self.endLoad()
         }
 
@@ -249,8 +278,8 @@ class QuestionsViewController: UIViewController, UITableViewDelegate, UITableVie
     }
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        if self.quesArray.count != 0{
-            return self.quesArray.count
+        if manager.quesArray.count != 0{
+            return manager.quesArray.count
         }else{
             return 0
         }
@@ -260,8 +289,8 @@ class QuestionsViewController: UIViewController, UITableViewDelegate, UITableVie
         
         let cell = tableView.dequeueReusableCell(withIdentifier: "cell", for: indexPath) as! QuestionCell
 
-        if self.quesArray.count != 0{
-            let dict = self.quesArray.object(at: indexPath.row) as! NSDictionary
+        if manager.quesArray.count != 0{
+            let dict = manager.quesArray.object(at: indexPath.row) as! NSDictionary
             let title = dict.object(forKey: "title") as! String
             let votes = dict.object(forKey: "score") as! NSNumber
             let answers = dict.object(forKey: "answer_count") as! NSNumber
@@ -290,7 +319,7 @@ class QuestionsViewController: UIViewController, UITableViewDelegate, UITableVie
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         
         currentIndex = indexPath.row
-        let dict = self.quesArray.object(at: indexPath.row) as! NSDictionary
+        let dict = manager.quesArray.object(at: indexPath.row) as! NSDictionary
         let title = dict.object(forKey: "title") as! String
         let votes = dict.object(forKey: "score") as! NSNumber
         let answers = dict.object(forKey: "answer_count") as! NSNumber
@@ -335,3 +364,4 @@ class QuestionsViewController: UIViewController, UITableViewDelegate, UITableVie
     }
 
 }
+
